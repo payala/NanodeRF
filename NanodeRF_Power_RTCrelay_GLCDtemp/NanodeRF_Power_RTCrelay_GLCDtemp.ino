@@ -1,3 +1,14 @@
+#include <JeeLib.h>
+#include <Ports.h>
+#include <PortsBMP085.h>
+#include <PortsLCD.h>
+#include <PortsSHT11.h>
+//#include <RF12.h>
+#include <RF12sio.h>
+//#include <RF69.h>
+//#include <RF69_avr.h>
+//#include <RF69_compat.h>
+
 /*
   NanodeRF_Power_RTCrelay_GLCDtemp
   
@@ -34,7 +45,7 @@
 #include <avr/wdt.h>
 
 #define MYNODE 15            
-#define RF_freq RF12_433MHZ     // frequency
+#define RF_freq RF12_868MHZ     // frequency
 #define group 210            // network group 
 
 //---------------------------------------------------
@@ -79,7 +90,7 @@ PacketBuffer str;
 static byte mymac[] = { 0x42,0x31,0x42,0x21,0x30,0x31 };
 
 // 1) Set this to the domain name of your hosted emoncms - leave blank if posting to IP address 
-char website[] PROGMEM = "emoncms.org";
+const char website[] PROGMEM = "emoncms.org";
 
 // or if your posting to a static IP server:
 static byte hisip[] = { 192,168,1,10 };
@@ -91,15 +102,15 @@ boolean use_hisip = false;
 char basedir[] = "";
 
 // 3) Set to your account write apikey 
-char apikey[] = "YOURAPIKEY";
+char apikey[] = "7b4704022e839079126406f6a8387c21";
 
 
 //IP address of remote sever, only needed when posting to a server that has not got a dns domain name (staticIP e.g local server) 
 byte Ethernet::buffer[700];
 static uint32_t timer;         
 
-const int redLED = 6;                     // NanodeRF RED indicator LED
-//const int redLED = 17;  		  // Open Kontrol Gateway LED indicator
+//const int redLED = 6;                     // NanodeRF RED indicator LED
+const int redLED = 17;  		  // Open Kontrol Gateway LED indicator
 const int greenLED = 5;                   // NanodeRF GREEN indicator LED
 
 int ethernet_error = 0;                   // Etherent (controller/DHCP) error flag
@@ -129,8 +140,8 @@ void setup () {
   Serial.begin(9600);
   Serial.println("\n[webClient]");
 
-  //if (ether.begin(sizeof Ethernet::buffer, mymac, 10) == 0) {	//for use with Open Kontrol Gateway 
-  if (ether.begin(sizeof Ethernet::buffer, mymac) == 0) {	//for use with NanodeRF
+  if (ether.begin(sizeof Ethernet::buffer, mymac, 10) == 0) {	//for use with Open Kontrol Gateway 
+  //if (ether.begin(sizeof Ethernet::buffer, mymac) == 0) {	//for use with NanodeRF
     Serial.println( "Failed to access Ethernet controller");
     ethernet_error = 1;  
   }
@@ -142,7 +153,7 @@ void setup () {
   rf_error=0;
 
   //For use with the modified JeeLib library to enable setting RFM12B SPI CS pin in the sketch. Download from: https://github.com/openenergymonitor/jeelib 
-  // rf12_set_cs(9);  //Open Kontrol Gateway	
+  rf12_set_cs(9);  //Open Kontrol Gateway	
   // rf12_set_cs(10); //emonTx, emonGLCD, NanodeRF, JeeNode
  
   rf12_initialize(MYNODE, RF_freq,group);
